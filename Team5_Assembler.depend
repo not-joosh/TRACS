@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1713957577 source:c:\users\notjo\onedrive\desktop\usc\usc-year3-sem2\3202-computer architecture\tracs\team5_assembler\assembler.c
+1713958256 source:c:\users\notjo\onedrive\desktop\usc\usc-year3-sem2\3202-computer architecture\tracs\team5_assembler\assembler.c
 	<stdio.h>
 	<string.h>
 	<stdlib.h>
@@ -11,11 +11,12 @@
 
 1713957036 c:\users\notjo\onedrive\desktop\usc\usc-year3-sem2\3202-computer architecture\tracs\team5_assembler\assembler.h
 
-1713958052 source:c:\users\notjo\onedrive\desktop\usc\usc-year3-sem2\3202-computer architecture\tracs\team5_assembler\main.c
+1713959300 source:c:\users\notjo\onedrive\desktop\usc\usc-year3-sem2\3202-computer architecture\tracs\team5_assembler\main.c
 	<stdio.h>
 	<stdlib.h>
 	<stdbool.h>
 	"assembler.h"
+	"translation.h"
 
 1713889985 c:\users\notjo\onedrive\desktop\usc\usc-year3-sem2\3202-computer architecture\tracs\team5_assembler\assembler.c
 	<stdio.h>
@@ -25,4 +26,12 @@
 	<unistd.h>
 	<ctype.h>
 	"Assembler.h"
+
+1713959239 c:\users\notjo\onedrive\desktop\usc\usc-year3-sem2\3202-computer architecture\tracs\team5_assembler\translation.h
+
+1713959230 source:c:\users\notjo\onedrive\desktop\usc\usc-year3-sem2\3202-computer architecture\tracs\team5_assembler\translation.c
+	<stdio.h>
+	<stdlib.h>
+	<stdbool.h>
+	"translation.h"
 

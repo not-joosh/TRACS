@@ -5,7 +5,6 @@ start   WB 0x05     ; write 0x05 to MBR
         WM 0x401    ; write data on MBR to memory at address 0x401
         RM 0x400    ; read address 0x400, store data to MBR
         WACC        ; write MBR to ACC (via BUS)
-        MOV 21      ; move 21 to ACC
         RM 0x401    ; read data at memory address 0x401, store to MBR
         ADD         ; add ACC to MBR (through BUS)
         RACC        ; read ACC, store to MBR

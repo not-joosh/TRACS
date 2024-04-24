@@ -1,15 +1,16 @@
  /*======================================================================================================
-* FILE        : Team5_assembler.c
+* FILE        : assembler.c
 * AUTHOR      : Josh Ratificar (Hardware Lead)
 *               Ben Cesar Cadungog (Software Lead)
 *               Jeddah Laine Luce�ara  (Research Lead)
 *               Harold Marvin Comendador (Documentation Lead)
-* DESCRIPTION : This program will translate the assembly code into formatted TRACS "C" code.
+* DESCRIPTION : This file contains the implementation of the functions that assemble the script.asm file.
 * COPYRIGHT   : 23 April, 2024
 * REVISION HISTORY:
 *   21 April, 2024: V1.0 - File Created
 *   22 April, 2024: V1.1 - Added the process_file function to read and format the assembly code
 *   23 April, 2024, V2.0 - Implemented Logic for label addressing, opcode conversion, and output redirection.
+*   24 April, 2024, V2.1 - Added error handling for invalid labels and instructions. Created Readme file.
 ======================================================================================================*/
 /*===============================================
  *   HEADER FILES
@@ -45,7 +46,7 @@ int assemble(void) {
         printf("Error reading lines\n");
         return success;
     }
-    
+
     // // Printing all the lines 
     // for (int i = 0; i < line_count; i++)
     // {
