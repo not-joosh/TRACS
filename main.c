@@ -27,29 +27,29 @@ int main()
     if(assemble())
     {
         printf("Assembly successful!\n");
+        int line_count;
+        MACHINE_CODE_LINE* array = interpretTranslation("translation.txt", &line_count);
+        if (array == NULL)
+        {
+            printf("Failed to interpret translation.\n");
+            return 1;
+        }
+
+        printf("Interpreted translation successfully.\n");
+
+        // Printing the contents of the array
+        for (int i = 0; i < line_count; i++)
+        {
+            printf("ADDR = %s; BUS = %s; MainMemory();\nADDR = %s; BUS = %s; MainMemory();\n", array[i].opcodeAddress, array[i].opcode, array[i].operandAddress, array[i].operand);
+        }
+
+        // Free the allocated memory
+        free(array);
+        return 0;
     }
     else
     {
         printf("Assembly failed!\n");
         return 0;
     }
-    int line_count;
-    MACHINE_CODE_LINE* array = interpretTranslation("translation.txt", &line_count);
-    if (array == NULL)
-    {
-        printf("Failed to interpret translation.\n");
-        return 1;
-    }
-
-    printf("Interpreted translation successfully.\n");
-
-    // Printing the contents of the array
-    for (int i = 0; i < line_count; i++)
-    {
-        printf("ADDR = %s; BUS = %s; MainMemory();\nADDR = %s; BUS = %s; MainMemory();\n", array[i].opcodeAddress, array[i].opcode, array[i].operandAddress, array[i].operand);
-    }
-
-    // Free the allocated memory
-    free(array);
-    return 0;
 }

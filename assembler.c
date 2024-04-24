@@ -12,6 +12,7 @@
 *   23 April, 2024, V2.0 - Implemented Logic for label addressing, opcode conversion, and output redirection.
 *   24 April, 2024, V2.1 - Added error handling for invalid labels and instructions. Created Readme file.
 *   25 April, 2024, V2.2 - Finalized Issue with handling operand that needs to be added with the opcode.
+*   25 April, 2024, V2.3 - Added error handling invalid operation for instruction. 
 ======================================================================================================*/
 /*===============================================
  *   HEADER FILES
@@ -108,6 +109,24 @@ int assemble(void) {
             printf("Invalid instruction: %s\n", lines[i].label);
             hasInvalidOperation = true;
         }
+        // There is also another condition, only BR, BRE, BRNE, BRGT, BRLT can have labels as operands
+        if(strcmp(lines[i].operation, "BR") != 0 && strcmp(lines[i].operation, "BRE") != 0 && strcmp(lines[i].operation, "BRNE") != 0 && strcmp(lines[i].operation, "BRGT") != 0 && strcmp(lines[i].operation, "BRLT") != 0)
+        {
+            if(lines[i].operand[0] != '\0' && strncmp(lines[i].operand, "0x", 2) != 0)
+            {
+                int labelFound = 0;
+                for (int j = 0; j < label_count; j++) {
+                    if (strcmp(lines[i].operand, labels[j].label) == 0) {
+                        labelFound = 1;
+                        break;
+                    }
+                }
+                if (labelFound) {
+                    printf("Error: Invalid operand for instruction: %s\n", lines[i].operation);
+                    hasInvalidOperation = true;
+                }
+            }
+        }
     }
     if(hasInvalidOperation) {
         free(lines);
@@ -139,7 +158,24 @@ int assemble(void) {
             concat = op.opcode | operand_int; 
             int first = (concat >> 8) & 0xFF;
             int second = concat & 0xFF;
-            fprintf(output_file, "0x%02x 0x%02x\t0x%02x 0x%02x\n", address, first, address + 1, second);
+            // Checking to see if it is a branch operation
+
+            if(strcmp(lines[i].operation, "BR") == 0 || strcmp(lines[i].operation, "BRE") == 0 || strcmp(lines[i].operation, "BRNE") == 0 || strcmp(lines[i].operation, "BRGT") == 0 || strcmp(lines[i].operation, "BRLT") == 0)
+            {
+                // We know that the branch points to a label. So instead of second, we will point to the label address
+                // Looping through each label to find the address of the label. We compare label name
+                for (int j = 0; j < label_count; j++) 
+                {
+                    if (strcmp(lines[i].operand, labels[j].label) == 0) {
+                        fprintf(output_file, "0x%02x 0x%02x\t0x%02x 0x%02x\n", address, first, address + 1, labels[j].address);
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                fprintf(output_file, "0x%02x 0x%02x\t0x%02x 0x%02x\n", address, first, address + 1, second);
+            }
         }
         else
         {
@@ -293,7 +329,7 @@ LINE* process_file(const char *filename, int *line_count) {
 *   RETURNS     :   char *
  *==============================================*/
 OPOBJ get_opcode(char *instruction) 
-{
+{ 
     OPOBJ op;
     if (strcmp(instruction, "WB") == 0)             {op.opcode = 0x30; op.addBoolean = false;}
     else if (strcmp(instruction, "WM") == 0)        {op.opcode = 0x08; op.addBoolean = true;}

@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1713974333 source:c:\users\notjo\onedrive\desktop\usc\usc-year3-sem2\3202-computer architecture\tracs\team5_assembler\assembler.c
+1714001909 source:c:\users\notjo\onedrive\desktop\usc\usc-year3-sem2\3202-computer architecture\tracs\team5_assembler\assembler.c
 	<stdio.h>
 	<string.h>
 	<stdlib.h>
@@ -11,7 +11,7 @@
 
 1713973262 c:\users\notjo\onedrive\desktop\usc\usc-year3-sem2\3202-computer architecture\tracs\team5_assembler\assembler.h
 
-1713978691 source:c:\users\notjo\onedrive\desktop\usc\usc-year3-sem2\3202-computer architecture\tracs\team5_assembler\main.c
+1714001659 source:c:\users\notjo\onedrive\desktop\usc\usc-year3-sem2\3202-computer architecture\tracs\team5_assembler\main.c
 	<stdio.h>
 	<stdlib.h>
 	<stdbool.h>
@@ -29,7 +29,7 @@
 
 1713959548 c:\users\notjo\onedrive\desktop\usc\usc-year3-sem2\3202-computer architecture\tracs\team5_assembler\translation.h
 
-1713959625 source:c:\users\notjo\onedrive\desktop\usc\usc-year3-sem2\3202-computer architecture\tracs\team5_assembler\translation.c
+1713978676 source:c:\users\notjo\onedrive\desktop\usc\usc-year3-sem2\3202-computer architecture\tracs\team5_assembler\translation.c
 	<stdio.h>
 	<stdlib.h>
 	<stdbool.h>
