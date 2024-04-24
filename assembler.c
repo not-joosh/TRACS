@@ -136,7 +136,7 @@ int assemble(void) {
         {
             op.opcode = op.opcode << 8;
             unsigned long operand_int = strtoul(lines[i].operand + 2, NULL, 16); // Skip "0x" prefix
-            concat = op.opcode | operand_int;
+            concat = op.opcode | operand_int; 
             int first = (concat >> 8) & 0xFF;
             int second = concat & 0xFF;
             fprintf(output_file, "0x%02x 0x%02x\t0x%02x 0x%02x\n", address, first, address + 1, second);

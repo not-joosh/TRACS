@@ -38,6 +38,10 @@
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="translation.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="translation.h" />
 		<Extensions>
 			<lib_finder disable_auto="1" />
 		</Extensions>
