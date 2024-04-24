@@ -29,26 +29,24 @@
 *   ARGUMENTS   :   bool *success, char **lines, const char *filename
 *   RETURNS     :   int
  *==============================================*/
-int assemble()
-{
-    //-------------- ENTRY POINT OF THE PROGRAM --------------//
-    // Initialization of variables
-    int line_count;
+int assemble(void) {
+    // Initialization...
+    int success = 0;
     unsigned int address = 0x000;
     unsigned int temp_address = 0x000;
     bool hasEOP = false;
     int label_count = 0;
+    int line_count;
     LABEL labels[MAX_LINES];
 
     // Step 1: Read the assembly code from the array and store it in an array of LINE structs
     LINE *lines = process_file("script.asm", &line_count);
-    if (lines == NULL) // Error Handling Case 1: No Lines Found
-    {
+    if (lines == NULL) {
         printf("Error reading lines\n");
-        return 1;
+        return success;
     }
-
-    // // Printing all lines
+    
+    // // Printing all the lines 
     // for (int i = 0; i < line_count; i++)
     // {
     //     printf("Label: %s, Operation: %s, Operand: %s\n", lines[i].label, lines[i].operation, lines[i].operand);
@@ -59,136 +57,112 @@ int assemble()
     temp_address = address; // Saving address to temp_address for later use (Labels)
 
     // Step 3: Create a label array and populate it with labels and their addresses
-    for (int i = 1; i < line_count; i++)
-    {
+    for (int i = 1; i < line_count; i++) {
         if(strcmp(lines[i].label, "EOP") == 0 || strcmp(lines[i].operation, "EOP") == 0) 
             hasEOP = true;
-        if (lines[i].label[0] != '\0')
-        {
+        if (lines[i].label[0] != '\0') {
             strcpy(labels[label_count].label, lines[i].label);
             labels[label_count].address = temp_address;
             label_count++;
         }
         temp_address += 2; // Increment the address for each line
     }
-    if(!hasEOP) 
-    {
+    if(!hasEOP) {
         printf("Error: No EOP found\n");
-        return 1;
+        free(lines);
+        return success;
     }
-    // Step 4: We need to iterate through all operands, then check if there is a label as an operand.
-    //          if there is a label, we will check if it is in the labels array, 
-    //          if a label marked as an operand is not found in the labels array, 
-    //          we will print an error message.
+
+    // Step 4: Check for invalid labels as operands...
     bool hasInvalidLabel = false;
-    for (int i = 1; i < line_count; i++)
-    {
-        if (lines[i].operand[0] != '\0' && strncmp(lines[i].operand, "0x", 2) != 0)
-        {
+    for (int i = 1; i < line_count; i++) {
+        if (lines[i].operand[0] != '\0' && strncmp(lines[i].operand, "0x", 2) != 0) {
             int labelFound = 0;
-            for (int j = 0; j < label_count; j++)
-            {
-                if (strcmp(lines[i].operand, labels[j].label) == 0)
-                {
+            for (int j = 0; j < label_count; j++) {
+                if (strcmp(lines[i].operand, labels[j].label) == 0) {
                     labelFound = 1;
                     break;
                 }
             }
-            if (!labelFound)
-            {
+            if (!labelFound) {
                 hasInvalidLabel = true;
                 printf("Error: Unknown Label: %s\n", lines[i].operand);
             }
         }
     }
 
-
-    //-------------- Writing Output to Text Document --------------//
-    FILE *output_file = fopen("translation.txt", "w"); // Open file for writing
-
-    //-------------- Writing Output to Text Document --------------//
-    char filename[50]; // Allocate space for the filename
-    sprintf(filename, "translation.txt"); // Generate filename with timestamp
-    if (output_file == NULL) {
-        printf("Error opening output file\n");
-        return 1; // Return error code if file cannot be opened
+    if(hasInvalidLabel) {
+        free(lines);
+        return success;
     }
 
-    // Redirect standard output to the file
-    dup2(fileno(output_file), STDOUT_FILENO);
-
-    // Print formatted TRACS code
-    for (int i = 1; i < line_count; i++)
-    {
+    bool hasInvalidOperation = false;
+    for (int i = 1; i < line_count; i++) {
         char *opcode = get_opcode(lines[i].operation);
-        if (opcode == NULL)
-        {
+        if (opcode == NULL) {
+            printf("Invalid instruction: %s\n", lines[i].label);
+            hasInvalidOperation = true;
+        }
+    }
+    if(hasInvalidOperation) {
+        free(lines);
+        return success;
+    }
+        
+    // Open file for writing...
+    FILE *output_file = fopen("translation.txt", "w"); 
+    if (output_file == NULL) {
+        printf("Error opening output file\n");
+        free(lines);
+        return success;
+    }
+
+    // Print formatted TRACS code...
+    for (int i = 1; i < line_count; i++) {
+        char *opcode = get_opcode(lines[i].operation);
+        if (opcode == NULL) {
             printf("Invalid instruction: %s\n", lines[i].operation);
             continue;
         }
-        // printf("ADDR = 0x%x; BUS = %s; MainMemory(); // %s\n", address, opcode, lines[i].operation);
-        printf("0x%x %s\t", address, opcode);
-        // Need to check if the operation is in labels, if it is, then we will print
-        // the label's address
+        fprintf(output_file, "0x%x %s\t", address, opcode);
         int labelFound = 0;
-        for (int j = 0; j < label_count; j++)
-        {
-            if (strcmp(lines[i].operand, labels[j].label) == 0)
-            {
-                // printf("ADDR = 0x%x; BUS = 0x%x; MainMemory();\n", address + 1, labels[j].address);
-                printf("0x%x 0x%x\n", address + 1, labels[j].address);
+        for (int j = 0; j < label_count; j++) {
+            if (strcmp(lines[i].operand, labels[j].label) == 0) {
+                fprintf(output_file, "0x%x 0x%x\n", address + 1, labels[j].address);
                 labelFound = 1;
                 break;
             }
         }
-
-        // Check if the operand is empty, treat it as 0x00
-        if (!labelFound && lines[i].operand[0] == '\0')
-        {
-            // printf("ADDR = 0x%x; BUS = 0x00; MainMemory();\n", address + 1);
-            printf("0x%x 0x00\n", address + 1);
+        if (!labelFound && lines[i].operand[0] == '\0') {
+            fprintf(output_file, "0x%x 0x00\n", address + 1);
             labelFound = 1;
         }
-
-        // Check if the operand is in the format of an address string (e.g., 0x053)
-        if (!labelFound && strncmp(lines[i].operand, "0x", 2) == 0)
-        {
-            // Check if the remaining characters are digits
+        if (!labelFound && strncmp(lines[i].operand, "0x", 2) == 0) {
             int k = 2;
-            while (lines[i].operand[k] != '\0')
-            {
-                if (!isdigit(lines[i].operand[k]))
-                {
-                    // printf("Warning: Unknown Label: %s Writing opcode %s\n", lines[i].operand, lines[i].operation);
+            while (lines[i].operand[k] != '\0') {
+                if (!isdigit(lines[i].operand[k])) {
                     break;
                 }
                 k++;
             }
-
-            // If all characters after "0x" are digits, treat it as an address string
-            if (lines[i].operand[k] == '\0')
-            {
-                // printf("ADDR = 0x%x; BUS = %s; MainMemory();\n", address + 1, lines[i].operand);
-                printf("0x%x %s\n", address + 1, lines[i].operand);
+            if (lines[i].operand[k] == '\0') {
+                fprintf(output_file, "0x%x %s\n", address + 1, lines[i].operand);
                 labelFound = 1;
             }
         }
-
-        // If the operand is neither a label nor an address string, print warning
-        if (!labelFound)
-        {
-            // printf("Warning: Unknown Label: %s Writing opcode %s\n", lines[i].operand, lines[i].operation);
+        if (!labelFound) {
+            fprintf(output_file, "Unknown Label: %s Writing opcode %s\n", lines[i].operand, lines[i].operation);
         }
         address += 2;
     }
 
     // Close the output file
     fclose(output_file);
-
-    //-------------- EXIT POINT OF THE PROGRAM --------------//
+    // Free allocated memory...
     free(lines);
-    return 0;
+    return 1;
 }
+
 
 
 /*===============================================

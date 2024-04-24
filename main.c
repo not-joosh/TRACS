@@ -6,6 +6,14 @@
 int main()
 {
     // Making a messageArray of strings
-    assemble();
-    return 0;
+    if(assemble())
+    {
+        printf("Assembly successful!\n");
+    }
+    else
+    {
+        printf("Assembly failed!\n");
+        return 0;
+    }
+    return 1;
 }
