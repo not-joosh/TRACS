@@ -17,11 +17,16 @@ typedef struct label {
     unsigned int address;
 } LABEL;
 
+typedef struct opcodeObj {
+    int opcode;
+    bool addBoolean;  
+} OPOBJ;
+
 /*===============================================
  *   FUNCTION PROTOTYPES
  *==============================================*/
 LINE* process_file(const char *filename, int *line_count);
-char* get_opcode(char *instruction);
+OPOBJ get_opcode(char *instruction);
 void set_address(unsigned int *address, int line_count, LINE *lines);
 void printLabels(int label_count, LABEL *labels);
 int assemble();

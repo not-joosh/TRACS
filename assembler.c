@@ -11,6 +11,7 @@
 *   22 April, 2024: V1.1 - Added the process_file function to read and format the assembly code
 *   23 April, 2024, V2.0 - Implemented Logic for label addressing, opcode conversion, and output redirection.
 *   24 April, 2024, V2.1 - Added error handling for invalid labels and instructions. Created Readme file.
+*   25 April, 2024, V2.2 - Finalized Issue with handling operand that needs to be added with the opcode.
 ======================================================================================================*/
 /*===============================================
  *   HEADER FILES
@@ -59,6 +60,7 @@ int assemble(void) {
 
     // Step 3: Create a label array and populate it with labels and their addresses
     for (int i = 1; i < line_count; i++) {
+        OPOBJ op = get_opcode(lines[i].operation);
         if(strcmp(lines[i].label, "EOP") == 0 || strcmp(lines[i].operation, "EOP") == 0) 
             hasEOP = true;
         if (lines[i].label[0] != '\0') {
@@ -68,7 +70,8 @@ int assemble(void) {
         }
         temp_address += 2; // Increment the address for each line
     }
-    if(!hasEOP) {
+    if(!hasEOP) 
+    {
         printf("Error: No EOP found\n");
         free(lines);
         return success;
@@ -99,8 +102,9 @@ int assemble(void) {
 
     bool hasInvalidOperation = false;
     for (int i = 1; i < line_count; i++) {
-        char *opcode = get_opcode(lines[i].operation);
-        if (opcode == NULL) {
+        OPOBJ op = get_opcode(lines[i].operation);
+        if (op.opcode == -1) 
+        {
             printf("Invalid instruction: %s\n", lines[i].label);
             hasInvalidOperation = true;
         }
@@ -120,39 +124,58 @@ int assemble(void) {
 
     // Print formatted TRACS code...
     for (int i = 1; i < line_count; i++) {
-        char *opcode = get_opcode(lines[i].operation);
-        if (opcode == NULL) {
+        bool flag = false;
+        OPOBJ op = get_opcode(lines[i].operation);
+        if (op.opcode == -1) 
+        {
             printf("Invalid instruction: %s\n", lines[i].operation);
             continue;
         }
-        fprintf(output_file, "0x%x %s\t", address, opcode);
-        int labelFound = 0;
-        for (int j = 0; j < label_count; j++) {
-            if (strcmp(lines[i].operand, labels[j].label) == 0) {
-                fprintf(output_file, "0x%x 0x%x\n", address + 1, labels[j].address);
-                labelFound = 1;
-                break;
-            }
+        int concat = 0x0000;
+        if(op.addBoolean)
+        {
+            op.opcode = op.opcode << 8;
+            unsigned long operand_int = strtoul(lines[i].operand + 2, NULL, 16); // Skip "0x" prefix
+            concat = op.opcode | operand_int;
+            int first = (concat >> 8) & 0xFF;
+            int second = concat & 0xFF;
+            fprintf(output_file, "0x%02x 0x%02x\t0x%02x 0x%02x\n", address, first, address + 1, second);
         }
-        if (!labelFound && lines[i].operand[0] == '\0') {
-            fprintf(output_file, "0x%x 0x00\n", address + 1);
-            labelFound = 1;
+        else
+        {
+            flag = true;
+            fprintf(output_file, "0x%02x 0x%02x\t", address, op.opcode);
         }
-        if (!labelFound && strncmp(lines[i].operand, "0x", 2) == 0) {
-            int k = 2;
-            while (lines[i].operand[k] != '\0') {
-                if (!isdigit(lines[i].operand[k])) {
+        if(flag)
+        {
+            int labelFound = 0;
+            for (int j = 0; j < label_count; j++) {
+                if (strcmp(lines[i].operand, labels[j].label) == 0) {
+                    fprintf(output_file, "0x%02x 0x%02x\n", address + 1, labels[j].address);
+                    labelFound = 1;
                     break;
                 }
-                k++;
             }
-            if (lines[i].operand[k] == '\0') {
-                fprintf(output_file, "0x%x %s\n", address + 1, lines[i].operand);
+            if (!labelFound && lines[i].operand[0] == '\0') {
+                fprintf(output_file, "0x%02x 0x00\n", address + 1);
                 labelFound = 1;
             }
-        }
-        if (!labelFound) {
-            fprintf(output_file, "Unknown Label: %s Writing opcode %s\n", lines[i].operand, lines[i].operation);
+            if (!labelFound && strncmp(lines[i].operand, "0x", 2) == 0) {
+                int k = 2;
+                while (lines[i].operand[k] != '\0') {
+                    if (!isdigit(lines[i].operand[k])) {
+                        break;
+                    }
+                    k++;
+                }
+                if (lines[i].operand[k] == '\0') {
+                    fprintf(output_file, "0x%02x %s\n", address + 1, lines[i].operand);
+                    labelFound = 1;
+                }
+            }
+            if (!labelFound) {
+                fprintf(output_file, "Unknown Label: %s Writing opcode %s\n", lines[i].operand, lines[i].operation);
+            }
         }
         address += 2;
     }
@@ -163,8 +186,6 @@ int assemble(void) {
     free(lines);
     return 1;
 }
-
-
 
 /*===============================================
 *   FUNCTION    :   set_address
@@ -271,33 +292,36 @@ LINE* process_file(const char *filename, int *line_count) {
 *   ARGUMENTS   :   char *instruction
 *   RETURNS     :   char *
  *==============================================*/
-char *get_opcode(char *instruction) {
-    if (strcmp(instruction, "WB") == 0)             return "0x30";
-    else if (strcmp(instruction, "WM") == 0)        return "0x0C";
-    else if (strcmp(instruction, "RM") == 0)        return "0x14";
-    else if (strcmp(instruction, "WACC") == 0)      return "0x58";
-    else if (strcmp(instruction, "WIB") == 0)       return "0x38";
-    else if (strcmp(instruction, "WIO") == 0)       return "0x28";
-    else if (strcmp(instruction, "RACC") == 0)      return "0x58";
-    else if (strcmp(instruction, "ADD") == 0)       return "0xF0";
-    else if (strcmp(instruction, "SUB") == 0)       return "0xE8";
-    else if (strcmp(instruction, "MUL") == 0)       return "0xD8";
-    else if (strcmp(instruction, "AND") == 0)       return "0xD0";
-    else if (strcmp(instruction, "OR") == 0)        return "0xC8";
-    else if (strcmp(instruction, "NOT") == 0)       return "0xC0";
-    else if (strcmp(instruction, "XOR") == 0)       return "0xB8";
-    else if (strcmp(instruction, "SHL") == 0)       return "0xB0";
-    else if (strcmp(instruction, "SHR") == 0)       return "0xA8";
-    else if (strcmp(instruction, "BR") == 0)        return "0x18";
-    else if (strcmp(instruction, "BRE") == 0)       return "0xA0";
-    else if (strcmp(instruction, "BRNE") == 0)      return "0x88";
-    else if (strcmp(instruction, "BRGT") == 0)      return "0x90";
-    else if (strcmp(instruction, "BRLT") == 0)      return "0x88";
-    else if (strcmp(instruction, "EOP") == 0)       return "0xF8";
-    else if (strcmp(instruction, "SWAP") == 0)      return "0x70";
-    else return NULL;
+OPOBJ get_opcode(char *instruction) 
+{
+    OPOBJ op;
+    if (strcmp(instruction, "WB") == 0)             {op.opcode = 0x30; op.addBoolean = false;}
+    else if (strcmp(instruction, "WM") == 0)        {op.opcode = 0x08; op.addBoolean = true;}
+    else if (strcmp(instruction, "RM") == 0)        {op.opcode = 0x10; op.addBoolean = true;}
+    else if (strcmp(instruction, "WACC") == 0)      {op.opcode = 0x48; op.addBoolean = false;}
+    else if (strcmp(instruction, "WIB") == 0)       {op.opcode = 0x38; op.addBoolean = false;}
+    else if (strcmp(instruction, "WIO") == 0)       {op.opcode = 0x28; op.addBoolean = true;}
+    else if (strcmp(instruction, "RACC") == 0)      {op.opcode = 0x58; op.addBoolean = false;}
+    else if (strcmp(instruction, "ADD") == 0)       {op.opcode = 0xF0; op.addBoolean = false;}
+    else if (strcmp(instruction, "SUB") == 0)       {op.opcode = 0xE8; op.addBoolean = false;}
+    else if (strcmp(instruction, "MUL") == 0)       {op.opcode = 0xD8; op.addBoolean = false;}
+    else if (strcmp(instruction, "AND") == 0)       {op.opcode = 0xD0; op.addBoolean = false;}
+    else if (strcmp(instruction, "OR") == 0)        {op.opcode = 0xC8; op.addBoolean = false;}
+    else if (strcmp(instruction, "NOT") == 0)       {op.opcode = 0xC0; op.addBoolean = false;}
+    else if (strcmp(instruction, "XOR") == 0)       {op.opcode = 0xB8; op.addBoolean = false;}
+    else if (strcmp(instruction, "SHL") == 0)       {op.opcode = 0xB0; op.addBoolean = false;}
+    else if (strcmp(instruction, "SHR") == 0)       {op.opcode = 0xA8; op.addBoolean = false;}
+    else if (strcmp(instruction, "BR") == 0)        {op.opcode = 0x18; op.addBoolean = true;}
+    else if (strcmp(instruction, "BRE") == 0)       {op.opcode = 0xA0; op.addBoolean = true;}
+    else if (strcmp(instruction, "BRNE") == 0)      {op.opcode = 0x98; op.addBoolean = true;}
+    else if (strcmp(instruction, "BRGT") == 0)      {op.opcode = 0x90; op.addBoolean = true;}
+    else if (strcmp(instruction, "BRLT") == 0)      {op.opcode = 0x88; op.addBoolean = true;}
+    else if (strcmp(instruction, "EOP") == 0)       {op.opcode = 0xF8; op.addBoolean = false;}
+    else if (strcmp(instruction, "SWAP") == 0)      {op.opcode = 0x70; op.addBoolean = false;}
+    else op.opcode = -1; // Indicates invalid opcode
+    
+    return op;
 }
-
 /*===============================================
 *   FUNCTION    :   printLabels
 *   DESCRIPTION :   This function will print the labels and their addresses.
@@ -311,4 +335,3 @@ void printLabels(int label_count, LABEL *labels)
         printf("Label: %s, Address: %x\n", labels[i].label, labels[i].address);
     }
 }
-
