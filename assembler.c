@@ -49,12 +49,12 @@ int assemble(void) {
         return success;
     }
 
-    // // Printing all the lines 
-    // for (int i = 0; i < line_count; i++)
-    // {
-    //     printf("Label: %s, Operation: %s, Operand: %s\n", lines[i].label, lines[i].operation, lines[i].operand);
-    // }
-
+    // Printing all the lines 
+    for (int i = 0; i < line_count; i++)
+    {
+        printf("Label: %s, Operation: %s, Operand: %s\n", lines[i].label, lines[i].operation, lines[i].operand);
+    }
+    getchar();
     // Step 2: If set, load address, else set to 0x000
     set_address(&address, line_count, lines);
     temp_address = address; // Saving address to temp_address for later use (Labels)
@@ -284,6 +284,10 @@ LINE* process_file(const char *filename, int *line_count) {
         while (end > start && (*end == ' ' || *end == '\t' || *end == '\n' || *end == '\r')) end--;
         *(end + 1) = '\0';
 
+        // Skip empty lines
+        if (strlen(start) == 0)
+            continue;
+
         // Parse the LINE and store it in the array
         if (strlen(start) > 0)
         {
@@ -319,6 +323,24 @@ LINE* process_file(const char *filename, int *line_count) {
             strcpy(lines[i].label, "");
         }
     }
+    
+    // Remove lines with empty label, operation, and operand fields
+    int index = 0;
+    for (int i = 0; i < *line_count; i++)
+    {
+        if (lines[i].label[0] != '\0' || lines[i].operation[0] != '\0' || lines[i].operand[0] != '\0')
+        {
+            if (i != index)
+            {
+                strcpy(lines[index].label, lines[i].label);
+                strcpy(lines[index].operation, lines[i].operation);
+                strcpy(lines[index].operand, lines[i].operand);
+            }
+            index++;
+        }
+    }
+    *line_count = index;
+
     return lines;
 }
 

@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1714001909 source:c:\users\notjo\onedrive\desktop\usc\usc-year3-sem2\3202-computer architecture\tracs\team5_assembler\assembler.c
+1714002036 source:c:\users\notjo\onedrive\desktop\usc\usc-year3-sem2\3202-computer architecture\tracs\team5_assembler\assembler.c
 	<stdio.h>
 	<string.h>
 	<stdlib.h>
@@ -33,5 +33,59 @@
 	<stdio.h>
 	<stdlib.h>
 	<stdbool.h>
+	"translation.h"
+
+1714002036 source:c:\users\notjo\onedrive\desktop\usc\usc-year3-sem2\3202-computer architecture\tracs\team5_assembler - copy\assembler.c
+	<stdio.h>
+	<string.h>
+	<stdlib.h>
+	<time.h>
+	<unistd.h>
+	<ctype.h>
+	<stdbool.h>
+	"assembler.h"
+
+1713973262 c:\users\notjo\onedrive\desktop\usc\usc-year3-sem2\3202-computer architecture\tracs\team5_assembler - copy\assembler.h
+
+1713978676 source:c:\users\notjo\onedrive\desktop\usc\usc-year3-sem2\3202-computer architecture\tracs\team5_assembler - copy\translation.c
+	<stdio.h>
+	<stdlib.h>
+	<stdbool.h>
+	"translation.h"
+
+1713959548 c:\users\notjo\onedrive\desktop\usc\usc-year3-sem2\3202-computer architecture\tracs\team5_assembler - copy\translation.h
+
+1714098497 source:c:\users\notjo\onedrive\desktop\usc\usc-year3-sem2\3202-computer architecture\tracs\team5_assembler - copy\main.c
+	<stdio.h>
+	<stdlib.h>
+	<stdbool.h>
+	"assembler.h"
+	"translation.h"
+
+1713978676 source:c:\users\notjo\onedrive\desktop\usc\usc-year3-sem2\3202-computer architecture\tracs\team5_assembler _merged\translation.c
+	<stdio.h>
+	<stdlib.h>
+	<stdbool.h>
+	"translation.h"
+
+1713959548 c:\users\notjo\onedrive\desktop\usc\usc-year3-sem2\3202-computer architecture\tracs\team5_assembler _merged\translation.h
+
+1715480015 source:c:\users\notjo\onedrive\desktop\usc\usc-year3-sem2\3202-computer architecture\tracs\team5_assembler _merged\assembler.c
+	<stdio.h>
+	<string.h>
+	<stdlib.h>
+	<time.h>
+	<unistd.h>
+	<ctype.h>
+	<stdbool.h>
+	"assembler.h"
+
+1713973262 c:\users\notjo\onedrive\desktop\usc\usc-year3-sem2\3202-computer architecture\tracs\team5_assembler _merged\assembler.h
+
+1715479595 source:c:\users\notjo\onedrive\desktop\usc\usc-year3-sem2\3202-computer architecture\tracs\team5_assembler _merged\main.c
+	<stdio.h>
+	<stdlib.h>
+	<stdbool.h>
+	"assembler.h"
 	"translation.h"
 
