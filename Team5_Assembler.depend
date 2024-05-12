@@ -70,7 +70,7 @@
 
 1713959548 c:\users\notjo\onedrive\desktop\usc\usc-year3-sem2\3202-computer architecture\tracs\team5_assembler _merged\translation.h
 
-1715480015 source:c:\users\notjo\onedrive\desktop\usc\usc-year3-sem2\3202-computer architecture\tracs\team5_assembler _merged\assembler.c
+1715486357 source:c:\users\notjo\onedrive\desktop\usc\usc-year3-sem2\3202-computer architecture\tracs\team5_assembler _merged\assembler.c
 	<stdio.h>
 	<string.h>
 	<stdlib.h>
@@ -82,10 +82,12 @@
 
 1713973262 c:\users\notjo\onedrive\desktop\usc\usc-year3-sem2\3202-computer architecture\tracs\team5_assembler _merged\assembler.h
 
-1715479595 source:c:\users\notjo\onedrive\desktop\usc\usc-year3-sem2\3202-computer architecture\tracs\team5_assembler _merged\main.c
+1715482175 source:c:\users\notjo\onedrive\desktop\usc\usc-year3-sem2\3202-computer architecture\tracs\team5_assembler _merged\main.c
 	<stdio.h>
 	<stdlib.h>
 	<stdbool.h>
+	<string.h>
+	<math.h>
 	"assembler.h"
 	"translation.h"
 

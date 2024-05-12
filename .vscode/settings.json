@@ -60,6 +60,8 @@
     "*.embeddedhtml": "html",
     "string.h": "c",
     "assembler.h": "c",
-    "stdio.h": "c"
+    "stdio.h": "c",
+    "TEST.C": "cpp",
+    "stdbool.h": "c"
   }
 }

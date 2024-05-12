@@ -78,6 +78,10 @@ int assemble(void) {
         return success;
     }
 
+    // printing labels
+    printLabels(label_count, labels);
+    getchar();
+
     // Step 4: Check for invalid labels as operands...
     bool hasInvalidLabel = false;
     for (int i = 1; i < line_count; i++) {
@@ -185,6 +189,7 @@ int assemble(void) {
         if(flag)
         {
             int labelFound = 0;
+            // Checking if the operand is a label
             for (int j = 0; j < label_count; j++) {
                 if (strcmp(lines[i].operand, labels[j].label) == 0) {
                     fprintf(output_file, "0x%02x 0x%02x\n", address + 1, labels[j].address);
@@ -192,10 +197,12 @@ int assemble(void) {
                     break;
                 }
             }
+            // Checking if the operand is a hex value
             if (!labelFound && lines[i].operand[0] == '\0') {
                 fprintf(output_file, "0x%02x 0x00\n", address + 1);
                 labelFound = 1;
             }
+            // Checking if the operand is a hex value
             if (!labelFound && strncmp(lines[i].operand, "0x", 2) == 0) {
                 int k = 2;
                 while (lines[i].operand[k] != '\0') {
@@ -207,10 +214,34 @@ int assemble(void) {
                 if (lines[i].operand[k] == '\0') {
                     fprintf(output_file, "0x%02x %s\n", address + 1, lines[i].operand);
                     labelFound = 1;
-                }
+                }// 
             }
-            if (!labelFound) {
-                fprintf(output_file, "Unknown Label: %s Writing opcode %s\n", lines[i].operand, lines[i].operation);
+            // The ones that have bugs:
+            // ADDR = 0x15, BUS = 0x38
+            // ADDR = Unknown, BUS = Label:
+            // ADDR = 0x2d, BUS = 0x20
+            // ADDR = Unknown, BUS = Label:
+            // ADDR = 0x33, BUS = 0x30
+            // ADDR = Unknown, BUS = Label:
+            // ADDR = 0x3b, BUS = 0x30
+            // ADDR = Unknown, BUS = Label:
+            // Operation: WIB, Operand: 0x0B, Label:
+            // Add Boolean: 0,s
+            // Operation: RIO, Operand: 0x01F, Label:
+            // Add Boolean: 0,
+            // Operation: WB, Operand: 0xFF, Label:
+            // Add Boolean: 0,
+            // Operation: WB, Operand: 0x2E, Label:
+            // Add Boolean: 0,
+            if(!labelFound){
+                // fprintf(output_file, "%s %s\n", lines[i].operand, lines[i].operation);
+                fprintf(output_file, "0x%02x %s\n", address + 1, lines[i].operand);
+                // printing the operation and operand and label
+                // fprintf(output_file, "0x%02x %s\n", address + 1, lines[i].operand);
+                printf("Operation: %s, Operand: %s, Label: %s\n", lines[i].operation, lines[i].operand, lines[i].label);
+                // checking add boolean
+                printf("Add Boolean: %d, ", op.addBoolean);
+                getchar();
             }
         }
         address += 2;
@@ -314,7 +345,7 @@ LINE* process_file(const char *filename, int *line_count) {
                 strcmp(lines[i].label, "BRE") == 0 || strcmp(lines[i].label, "BRNE") == 0 ||
                 strcmp(lines[i].label, "BRGT") == 0 || strcmp(lines[i].label, "BRLT") == 0 ||
                 strcmp(lines[i].label, "EOP") == 0 || strcmp(lines[i].label, "SWAP") == 0 ||
-                strcmp(lines[i].label, "WB") == 0
+                strcmp(lines[i].label, "WB") == 0 || strcmp(lines[i].label, "RIO") == 0
             ))
         {
             // This means it's not a label, so move everything to the right
@@ -376,6 +407,7 @@ OPOBJ get_opcode(char *instruction)
     else if (strcmp(instruction, "BRLT") == 0)      {op.opcode = 0x88; op.addBoolean = true;}
     else if (strcmp(instruction, "EOP") == 0)       {op.opcode = 0xF8; op.addBoolean = false;}
     else if (strcmp(instruction, "SWAP") == 0)      {op.opcode = 0x70; op.addBoolean = false;}
+    else if (strcmp(instruction, "RIO") == 0)       {op.opcode = 0x20; op.addBoolean = false;}  // Added RIO
     else op.opcode = -1; // Indicates invalid opcode
     
     return op;
